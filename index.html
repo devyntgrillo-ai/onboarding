@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>New Client Intake — The Implant Initiative</title>
-<link rel="icon" type="image/png" href="favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -38,7 +37,8 @@ main{width:100%;max-width:820px;padding:3rem 2rem 5rem;position:relative;z-index
 .hero p{font-size:.95rem;color:rgba(255,255,255,.45);line-height:1.85;max-width:520px}
 
 .progress-track{display:flex;align-items:stretch;gap:0;margin-bottom:3rem;border:1px solid var(--border)}
-.prog-step{flex:1;padding:.8rem 1.1rem;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border-right:1px solid var(--border);transition:all .3s;display:flex;align-items:center;gap:.5rem}
+.prog-step{flex:1;padding:.8rem 1.1rem;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border-right:1px solid var(--border);transition:all .3s;display:flex;align-items:center;gap:.5rem;cursor:pointer;user-select:none}
+.prog-step:hover{color:rgba(255,255,255,.6);background:rgba(255,255,255,.03)}
 .prog-step:last-child{border-right:none}
 .prog-step.active{color:var(--white);background:rgba(138,164,190,.05)}
 .prog-step.done{color:rgba(138,164,190,.5)}
@@ -127,6 +127,13 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
 .spin{display:inline-block;width:11px;height:11px;border:1.5px solid rgba(10,12,15,.25);border-top-color:var(--ink);border-radius:50%;animation:rot .6s linear infinite;margin-left:8px;vertical-align:middle}
 @keyframes rot{to{transform:rotate(360deg)}}
 
+.error-toast{display:none;align-items:center;gap:.75rem;padding:.75rem 1rem;background:rgba(224,92,92,.08);border:1px solid rgba(224,92,92,.25);border-left:3px solid var(--red);margin-bottom:1.25rem;font-size:12px;font-weight:600;letter-spacing:.04em;color:rgba(255,255,255,.7);animation:fadeUp .2s ease}
+.error-toast.show{display:flex}
+.error-toast svg{flex-shrink:0;width:14px;height:14px;color:var(--red)}
+.field.has-error input,.field.has-error select,.field.has-error textarea{border-color:rgba(224,92,92,.5);background:rgba(224,92,92,.04)}
+.field.has-error label{color:rgba(224,92,92,.8)}
+.radio-stack.has-error{outline:1px solid rgba(224,92,92,.35);outline-offset:4px}
+
 .success{display:none;text-align:center;padding:5rem 2rem}
 .success.show{display:block;animation:fadeUp .4s ease}
 .success-mark{width:60px;height:60px;border:1px solid rgba(94,204,138,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 2rem}
@@ -196,23 +203,6 @@ footer{position:relative;z-index:1;width:100%;max-width:820px;padding:1.5rem 2re
       </div>
     </div>
     <div class="section-group">
-      <div class="group-label">Key contacts</div>
-      <div id="keyContacts">
-        <div class="contact-card">
-          <div class="contact-card-header">
-            <span class="contact-card-title">Contact 1</span>
-          </div>
-          <div class="form-grid">
-            <div class="field"><label>Full name</label><input type="text" class="kc-name" placeholder="e.g. Sarah Johnson"></div>
-            <div class="field"><label>Role</label><select class="kc-role"><option value="">Select role</option><option>Office Manager</option><option>Front Desk</option><option>Scheduling Coordinator</option><option>Billing Coordinator</option><option>Dental Assistant</option><option>Hygienist</option><option>Other</option></select></div>
-            <div class="field"><label>Email</label><input type="email" class="kc-email" placeholder="contact@practice.com"></div>
-            <div class="field"><label>Phone / ext</label><input type="tel" class="kc-phone" placeholder="(555) 000-0000"></div>
-          </div>
-        </div>
-      </div>
-      <button class="add-btn" onclick="addContact()"><span class="add-icon">+</span>Add another contact</button>
-    </div>
-    <div class="section-group">
       <div class="group-label">Treatment coordinator</div>
       <div class="field full"><label>Do you have a dedicated TC? <span class="req">*</span></label>
         <div class="radio-stack" id="rg-hasTC">
@@ -234,6 +224,24 @@ footer{position:relative;z-index:1;width:100%;max-width:820px;padding:1.5rem 2re
         </div>
       </div>
     </div>
+    <div class="section-group">
+      <div class="group-label">Key contacts</div>
+      <div id="keyContacts">
+        <div class="contact-card">
+          <div class="contact-card-header">
+            <span class="contact-card-title">Contact 1</span>
+          </div>
+          <div class="form-grid">
+            <div class="field"><label>Full name</label><input type="text" class="kc-name" placeholder="e.g. Sarah Johnson"></div>
+            <div class="field"><label>Role</label><select class="kc-role"><option value="">Select role</option><option>Office Manager</option><option>Front Desk</option><option>Scheduling Coordinator</option><option>Billing Coordinator</option><option>Dental Assistant</option><option>Hygienist</option><option>Other</option></select></div>
+            <div class="field"><label>Email</label><input type="email" class="kc-email" placeholder="contact@practice.com"></div>
+            <div class="field"><label>Phone / ext</label><input type="tel" class="kc-phone" placeholder="(555) 000-0000"></div>
+          </div>
+        </div>
+      </div>
+      <button class="add-btn" onclick="addContact()"><span class="add-icon">+</span>Add another contact</button>
+    </div>
+    <div class="error-toast" id="err-1"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Please complete the required fields above.</div>
     <div class="btn-row">
       <div class="step-indicator"><strong>1</strong> of 4</div>
       <button class="btn primary" onclick="next(1)">Continue &rarr;</button>
@@ -269,6 +277,7 @@ footer{position:relative;z-index:1;width:100%;max-width:820px;padding:1.5rem 2re
         <div class="slider-field"><div class="slider-top"><span class="slider-label">Treatment acceptance</span><span class="slider-val" id="sv-accRate">22%</span></div><input type="range" id="sl-accRate" min="5" max="65" step="1" value="22" oninput="sv(this,'sv-accRate',v=>v+'%')"><div class="slider-ends"><span>5%</span><span>65%</span></div></div>
       </div>
     </div>
+    <div class="error-toast" id="err-2"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Please complete the required fields above.</div>
     <div class="btn-row">
       <button class="btn" onclick="prev(2)">&larr; Back</button>
       <div class="step-indicator"><strong>2</strong> of 4</div>
@@ -318,6 +327,7 @@ footer{position:relative;z-index:1;width:100%;max-width:820px;padding:1.5rem 2re
         <div class="field full"><label>Practice management software (PMS)</label><input id="crm" type="text" placeholder="Dentrix, Eaglesoft, Curve, none…"></div>
       </div>
     </div>
+    <div class="error-toast" id="err-3"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Please complete the required fields above.</div>
     <div class="btn-row">
       <button class="btn" onclick="prev(3)">&larr; Back</button>
       <div class="step-indicator"><strong>3</strong> of 4</div>
@@ -377,6 +387,7 @@ footer{position:relative;z-index:1;width:100%;max-width:820px;padding:1.5rem 2re
       <div class="group-label">Anything else</div>
       <div class="field full"><label>Notes for our first call</label><textarea id="notes" placeholder="Challenges, past agency experiences, team dynamics, timeline…"></textarea></div>
     </div>
+    <div class="error-toast" id="err-4"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Please complete the required fields above.</div>
     <div class="btn-row">
       <button class="btn" onclick="prev(4)">&larr; Back</button>
       <div class="step-indicator"><strong>4</strong> of 4</div>
@@ -388,8 +399,8 @@ footer{position:relative;z-index:1;width:100%;max-width:820px;padding:1.5rem 2re
     <div class="success-mark">
       <svg viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4L19 7" stroke="#5ecc8a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
-    <h2>You're all set.</h2>
-    <p>We've received your intake. Devyn or the team will review your numbers and be in touch within 1 business day to get your first call on the calendar.</p>
+    <h2>Intake received.</h2>
+    <p>One last step — pick a time for your kickoff call. Redirecting you now…</p>
   </div>
 </main>
 
@@ -399,13 +410,52 @@ footer{position:relative;z-index:1;width:100%;max-width:820px;padding:1.5rem 2re
 </footer>
 
 <script>
-var cur=1,agencyCount=0,contactCount=1;
+var cur=1,agencyCount=0,contactCount=1,maxReached=1;
 
 function sv(el,id,fmt){document.getElementById(id).textContent=fmt(el.value)}
-
-function togglePill(el){el.classList.toggle("on")}
+function togglePill(el){el.classList.toggle("on");clearErr(cur)}
 function getPills(id){return Array.from(document.querySelectorAll("#"+id+" .pill.on")).map(p=>p.textContent.trim()).join(", ")}
 function getRadio(name){var el=document.querySelector('input[name="'+name+'"]:checked');return el?el.value:""}
+
+function showErr(step, msg) {
+  var t = document.getElementById("err-"+step);
+  if(t){ t.querySelector ? t.lastChild.textContent = msg : null; t.classList.add("show"); }
+}
+function clearErr(step) {
+  var t = document.getElementById("err-"+step);
+  if(t) t.classList.remove("show");
+  document.querySelectorAll("#step-"+step+" .has-error").forEach(function(el){el.classList.remove("has-error")});
+}
+
+function markField(id){
+  var el=document.getElementById(id);
+  if(el) el.closest(".field") && el.closest(".field").classList.add("has-error");
+}
+function markRadio(id){
+  var el=document.getElementById(id);
+  if(el) el.classList.add("has-error");
+}
+function markPills(id){
+  var el=document.getElementById(id);
+  if(el) el.closest(".field") && el.closest(".field").classList.add("has-error");
+}
+
+function validate(n){
+  clearErr(n);
+  var ok=true;
+  if(n===1){
+    if(!document.getElementById("doctorName").value.trim()){markField("doctorName");ok=false;}
+    if(!document.getElementById("practiceName").value.trim()){markField("practiceName");ok=false;}
+    var em=document.getElementById("email").value.trim();
+    if(!em||!/\S+@\S+\.\S+/.test(em)){markField("email");ok=false;}
+    if(!document.getElementById("phone").value.trim()){markField("phone");ok=false;}
+    if(!getRadio("hasTC")){markRadio("rg-hasTC");ok=false;}
+  }
+  if(n===2&&!getRadio("implantExp")){markRadio("rg-implantExp");ok=false;}
+  if(n===4&&!getPills("pg-goals")){markPills("pg-goals");ok=false;}
+  if(!ok) showErr(n, "Please complete the required fields above.");
+  return ok;
+}
 
 function initRadios(){
   document.querySelectorAll(".radio-opt input[type=radio]").forEach(function(r){
@@ -413,8 +463,41 @@ function initRadios(){
       var g=r.closest(".radio-stack");
       if(g)g.querySelectorAll(".radio-opt").forEach(function(o){o.classList.remove("selected")});
       r.closest(".radio-opt").classList.add("selected");
+      clearErr(cur);
     });
   });
+  document.querySelectorAll("input[type=text],input[type=email],input[type=tel],input[type=url],textarea").forEach(function(i){
+    i.addEventListener("input",function(){clearErr(cur);});
+  });
+}
+
+function goToStep(n){
+  if(n===cur) return;
+  if(n > maxReached) return;
+  document.getElementById("step-"+cur).classList.remove("active");
+  cur=n;
+  document.getElementById("step-"+cur).classList.add("active");
+  updateProgress(cur);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function updateProgress(n){
+  var steps=document.querySelectorAll(".prog-step");
+  var track=document.getElementById("progressTrack");
+  var bar=document.getElementById("progressBar");
+  var activeStep=null;
+  steps.forEach(function(s){
+    var sn=parseInt(s.dataset.step);
+    s.classList.remove("active","done");
+    if(sn===n){s.classList.add("active");activeStep=s;}
+    else if(sn<n) s.classList.add("done");
+    s.style.opacity=(sn<=maxReached)?"1":"0.4";
+    s.style.cursor=(sn<=maxReached)?"pointer":"default";
+  });
+  if(activeStep&&bar){
+    bar.style.left=activeStep.offsetLeft+"px";
+    bar.style.width=activeStep.offsetWidth+"px";
+  }
 }
 
 function toggleTC(opt,val){
@@ -561,25 +644,11 @@ function getAgencies(){
   });
 }
 
-function validate(n){
-  if(n===1){
-    if(!document.getElementById("doctorName").value.trim()){alert("Please enter the doctor's name.");return false;}
-    if(!document.getElementById("practiceName").value.trim()){alert("Please enter the practice name.");return false;}
-    var em=document.getElementById("email").value.trim();
-    if(!em||!/\S+@\S+\.\S+/.test(em)){alert("Please enter a valid email address.");return false;}
-    if(!document.getElementById("phone").value.trim()){alert("Please enter a phone number.");return false;}
-    if(!getRadio("hasTC")){alert("Please select your TC situation.");return false;}
-  }
-  if(n===2&&!getRadio("implantExp")){alert("Please select how long you've been placing implants.");return false;}
-  if(n===3&&!getPills("pg-sources")&&false){}
-  if(n===4&&!getPills("pg-goals")){alert("Please select at least one 90-day goal.");return false;}
-  return true;
-}
-
 function next(n){
   if(!validate(n))return;
   document.getElementById("step-"+n).classList.remove("active");
   cur=n+1;
+  if(cur>maxReached) maxReached=cur;
   document.getElementById("step-"+cur).classList.add("active");
   updateProgress(cur);
   window.scrollTo({top:0,behavior:"smooth"});
@@ -607,7 +676,7 @@ function submitForm(){
     city:document.getElementById("city").value.trim(),
     state:document.getElementById("state").value.trim(),
     website:document.getElementById("website").value.trim(),
-    key_contacts:getKeyContacts(),
+    key_contacts:JSON.stringify(getKeyContacts()),
     implant_experience:getRadio("implantExp"),
     cases_per_month:document.getElementById("sl-cases").value,
     monthly_leads:document.getElementById("sl-leads").value,
@@ -618,12 +687,12 @@ function submitForm(){
     lead_sources:getPills("pg-sources"),
     monthly_ad_spend:document.getElementById("sl-adSpend").value,
     has_tc:getRadio("hasTC"),
-    tc_name:tcEl.classList.contains("show")?(document.getElementById("tc-name").value.trim()):"",
-    tc_email:tcEl.classList.contains("show")?(document.getElementById("tc-email").value.trim()):"",
-    tc_phone:tcEl.classList.contains("show")?(document.getElementById("tc-phone").value.trim()):"",
-    tc_tenure:tcEl.classList.contains("show")?(document.getElementById("tc-tenure").value):"",
+    tc_name:tcEl.classList.contains("show")?document.getElementById("tc-name").value.trim():"",
+    tc_email:tcEl.classList.contains("show")?document.getElementById("tc-email").value.trim():"",
+    tc_phone:tcEl.classList.contains("show")?document.getElementById("tc-phone").value.trim():"",
+    tc_tenure:tcEl.classList.contains("show")?document.getElementById("tc-tenure").value:"",
     has_agency:getRadio("hasAgency"),
-    agencies:getAgencies(),
+    agencies:JSON.stringify(getAgencies()),
     crm_software:document.getElementById("crm").value.trim(),
     goals_90_day:getPills("pg-goals"),
     biggest_leak:getRadio("biggestLeak"),
@@ -632,20 +701,92 @@ function submitForm(){
     notes:document.getElementById("notes").value.trim(),
     submitted_at:new Date().toISOString()
   };
-  fetch("https://hooks.zapier.com/hooks/catch/26940795/u74wpkg/",{method:"POST",body:JSON.stringify(payload)})
-  .then(function(){
+
+  var params=new URLSearchParams();
+  Object.keys(payload).forEach(function(k){ params.append(k, payload[k]); });
+
+  var iframe=document.createElement("iframe");
+  iframe.name="zap_iframe";
+  iframe.style.display="none";
+  document.body.appendChild(iframe);
+
+  var form=document.createElement("form");
+  form.method="GET";
+  form.action="https://hooks.zapier.com/hooks/catch/26940795/u74wpkg/";
+  form.target="zap_iframe";
+  form.style.display="none";
+
+  Object.keys(payload).forEach(function(k){
+    var input=document.createElement("input");
+    input.type="hidden";
+    input.name=k;
+    input.value=payload[k];
+    form.appendChild(input);
+  });
+
+  // ── Save to localStorage so PM tool can pick it up ──
+  try {
+    var existingSubs = JSON.parse(localStorage.getItem('pm_intake') || '[]');
+    var pmSubmission = {
+      id: 'intake_' + Date.now(),
+      submittedAt: payload.submitted_at,
+      doctorName: payload.doctor_name,
+      practiceName: payload.practice_name,
+      email: payload.email,
+      phone: payload.phone,
+      city: payload.city,
+      state: payload.state,
+      website: payload.website,
+      keyContacts: payload.key_contacts,
+      implantExperience: payload.implant_experience,
+      casesPerMonth: payload.cases_per_month,
+      monthlyLeads: payload.monthly_leads,
+      avgCaseValue: payload.avg_case_value,
+      showRate: payload.consult_show_rate_pct,
+      bookingRate: payload.booking_rate_pct,
+      acceptanceRate: payload.acceptance_rate_pct,
+      leadSources: payload.lead_sources,
+      monthlyAdSpend: payload.monthly_ad_spend,
+      hasTC: payload.has_tc,
+      tcName: payload.tc_name,
+      tcEmail: payload.tc_email,
+      tcPhone: payload.tc_phone,
+      tcTenure: payload.tc_tenure,
+      hasAgency: payload.has_agency,
+      agencies: payload.agencies,
+      crm: payload.crm_software,
+      goals90Day: payload.goals_90_day,
+      biggestLeak: payload.biggest_leak,
+      targetAnnualRevenue: payload.target_annual_revenue,
+      heardFrom: payload.heard_from,
+      notes: payload.notes,
+    };
+    existingSubs.unshift(pmSubmission);
+    localStorage.setItem('pm_intake', JSON.stringify(existingSubs));
+  } catch(e) { console.warn('localStorage save failed', e); }
+
+  document.body.appendChild(form);
+  form.submit();
+
+  setTimeout(function(){
     document.getElementById("step-4").classList.remove("active");
     document.getElementById("progressTrack").style.opacity="0.25";
     document.getElementById("successState").classList.add("show");
     window.scrollTo({top:0,behavior:"smooth"});
-  })
-  .catch(function(){
-    btn.disabled=false;btn.innerHTML="Submit intake &rarr;";
-    alert("Something went wrong. Please try again.");
-  });
+    document.body.removeChild(form);
+    document.body.removeChild(iframe);
+
+    // Redirect to kickoff call scheduling page
+    setTimeout(function(){
+      window.location.href = "https://onboarding.theimplantinitiative.com/kickoff-call";
+    }, 1500);
+  }, 800);
 }
 
 initRadios();
+document.querySelectorAll(".prog-step").forEach(function(s){
+  s.addEventListener("click",function(){ goToStep(parseInt(s.dataset.step)); });
+});
 updateProgress(1);
 </script>
 </body>
