@@ -708,28 +708,6 @@ function submitForm(){
     submitted_at:new Date().toISOString()
   };
 
-  var params=new URLSearchParams();
-  Object.keys(payload).forEach(function(k){ params.append(k, payload[k]); });
-
-  var iframe=document.createElement("iframe");
-  iframe.name="zap_iframe";
-  iframe.style.display="none";
-  document.body.appendChild(iframe);
-
-  var form=document.createElement("form");
-  form.method="GET";
-  form.action="https://hooks.zapier.com/hooks/catch/26940795/u74wpkg/";
-  form.target="zap_iframe";
-  form.style.display="none";
-
-  Object.keys(payload).forEach(function(k){
-    var input=document.createElement("input");
-    input.type="hidden";
-    input.name=k;
-    input.value=payload[k];
-    form.appendChild(input);
-  });
-
   // ── Save to localStorage so PM tool can pick it up ──
   try {
     var existingSubs = JSON.parse(localStorage.getItem('pm_intake') || '[]');
@@ -773,22 +751,37 @@ function submitForm(){
     localStorage.setItem('pm_intake', JSON.stringify(existingSubs));
   } catch(e) { console.warn('localStorage save failed', e); }
 
-  document.body.appendChild(form);
-  form.submit();
-
-  setTimeout(function(){
+  // Show the success state right away so the user has feedback
+  function showSuccessAndRedirect(){
     document.getElementById("step-4").classList.remove("active");
     document.getElementById("progressTrack").style.opacity="0.25";
     document.getElementById("successState").classList.add("show");
     window.scrollTo({top:0,behavior:"smooth"});
-    document.body.removeChild(form);
-    document.body.removeChild(iframe);
-
-    // Redirect to kickoff call scheduling page
     setTimeout(function(){
       window.location.href = "https://onboarding.theimplantinitiative.com/kickoff-call";
-    }, 1500);
-  }, 800);
+    }, 1800);
+  }
+
+  // POST to Zapier with keepalive so the request survives any navigation.
+  // No-cors so a missing CORS header doesn't trip a JS error — Zapier still
+  // receives and processes the body either way.
+  fetch("https://hooks.zapier.com/hooks/catch/26940795/u74wpkg/", {
+    method: "POST",
+    mode: "no-cors",
+    keepalive: true,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  }).then(function(){
+    showSuccessAndRedirect();
+  }).catch(function(err){
+    console.warn("Zapier POST error:", err);
+    // Fallback: try sendBeacon, then show success regardless so the user isn't stuck
+    try {
+      var blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
+      navigator.sendBeacon("https://hooks.zapier.com/hooks/catch/26940795/u74wpkg/", blob);
+    } catch(e) { /* noop */ }
+    showSuccessAndRedirect();
+  });
 }
 
 initRadios();
