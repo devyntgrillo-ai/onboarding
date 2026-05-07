@@ -196,11 +196,32 @@ footer{position:relative;z-index:1;width:100%;max-width:820px;padding:1.5rem 2re
       </div>
     </div>
     <div class="section-group">
-      <div class="group-label">Location</div>
+      <div class="group-label">Practice address</div>
       <div class="form-grid">
-        <div class="field"><label>City</label><input id="city" type="text" placeholder="Denver"></div>
-        <div class="field"><label>State</label><input id="state" type="text" placeholder="CO"></div>
+        <div class="field full"><label>Street address <span class="req">*</span></label><input id="phys-street" type="text" placeholder="123 Main Street" autocomplete="address-line1"></div>
+        <div class="field full"><label>Suite, unit, or floor <span style="color:var(--muted);font-weight:400">(optional)</span></label><input id="phys-street2" type="text" placeholder="Suite 200" autocomplete="address-line2"></div>
+        <div class="field"><label>City <span class="req">*</span></label><input id="phys-city" type="text" placeholder="Denver" autocomplete="address-level2"></div>
+        <div class="field"><label>State <span class="req">*</span></label><input id="phys-state" type="text" placeholder="CO" autocomplete="address-level1"></div>
+        <div class="field"><label>ZIP / Postal code <span class="req">*</span></label><input id="phys-zip" type="text" placeholder="80202" autocomplete="postal-code"></div>
         <div class="field full"><label>Practice website</label><input id="website" type="url" placeholder="https://yourpractice.com"></div>
+      </div>
+      <div class="field full" style="margin-top:1rem"><label>Is your mailing address the same as your physical address? <span class="req">*</span></label>
+        <div class="radio-stack" id="rg-mailingSame">
+          <label class="radio-opt" onclick="toggleMailing(this,'yes')"><input type="radio" name="mailingSame" value="Yes — same as physical"><span class="radio-dot"></span>Yes — same as physical</label>
+          <label class="radio-opt" onclick="toggleMailing(this,'no')"><input type="radio" name="mailingSame" value="No — different mailing address"><span class="radio-dot"></span>No — different mailing address</label>
+        </div>
+      </div>
+      <div class="conditional" id="mailing-info" style="margin-top:1rem">
+        <div class="contact-card">
+          <div class="contact-card-header"><span class="contact-card-title">Mailing address</span></div>
+          <div class="form-grid">
+            <div class="field full"><label>Street address</label><input id="mail-street" type="text" placeholder="PO Box 1234 or 456 Other Street"></div>
+            <div class="field full"><label>Suite, unit, or floor <span style="color:var(--muted);font-weight:400">(optional)</span></label><input id="mail-street2" type="text" placeholder="Suite 200"></div>
+            <div class="field"><label>City</label><input id="mail-city" type="text" placeholder="Denver"></div>
+            <div class="field"><label>State</label><input id="mail-state" type="text" placeholder="CO"></div>
+            <div class="field"><label>ZIP / Postal code</label><input id="mail-zip" type="text" placeholder="80202"></div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="section-group">
@@ -451,6 +472,11 @@ function validate(n){
     var em=document.getElementById("email").value.trim();
     if(!em||!/\S+@\S+\.\S+/.test(em)){markField("email");ok=false;}
     if(!document.getElementById("phone").value.trim()){markField("phone");ok=false;}
+    if(!document.getElementById("phys-street").value.trim()){markField("phys-street");ok=false;}
+    if(!document.getElementById("phys-city").value.trim()){markField("phys-city");ok=false;}
+    if(!document.getElementById("phys-state").value.trim()){markField("phys-state");ok=false;}
+    if(!document.getElementById("phys-zip").value.trim()){markField("phys-zip");ok=false;}
+    if(!getRadio("mailingSame")){markRadio("rg-mailingSame");ok=false;}
     if(!getRadio("hasTC")){markRadio("rg-hasTC");ok=false;}
   }
   if(n===2&&!getRadio("implantExp")){markRadio("rg-implantExp");ok=false;}
@@ -507,6 +533,13 @@ function toggleTC(opt,val){
     var show=val==="yes-ftc"||val==="yes-pt";
     var el=document.getElementById("tc-info");
     el.classList.toggle("show",show);
+  },50);
+}
+
+function toggleMailing(opt,val){
+  setTimeout(function(){
+    var el=document.getElementById("mailing-info");
+    el.classList.toggle("show",val==="no");
   },50);
 }
 
@@ -672,6 +705,36 @@ function submitForm(){
   var tcEl=document.getElementById("tc-info");
   var firstName = document.getElementById("doctorFirstName").value.trim();
   var lastName = document.getElementById("doctorLastName").value.trim();
+  // Physical address (always collected, all required)
+  var physStreet  = document.getElementById("phys-street").value.trim();
+  var physStreet2 = document.getElementById("phys-street2").value.trim();
+  var physCity    = document.getElementById("phys-city").value.trim();
+  var physState   = document.getElementById("phys-state").value.trim();
+  var physZip     = document.getElementById("phys-zip").value.trim();
+  var physFull    = [physStreet, physStreet2, physCity + (physState? ", "+physState:""), physZip]
+                      .filter(function(s){return s && s.replace(/^,\s*$/,"").length;}).join(", ");
+
+  // Mailing address logic
+  var mailingSameVal = getRadio("mailingSame");
+  var mailingSame    = mailingSameVal && mailingSameVal.indexOf("Yes") === 0;
+  var mailStreet="", mailStreet2="", mailCity="", mailState="", mailZip="", mailFull="";
+  if (mailingSame) {
+    mailStreet  = physStreet;
+    mailStreet2 = physStreet2;
+    mailCity    = physCity;
+    mailState   = physState;
+    mailZip     = physZip;
+    mailFull    = physFull;
+  } else {
+    mailStreet  = document.getElementById("mail-street").value.trim();
+    mailStreet2 = document.getElementById("mail-street2").value.trim();
+    mailCity    = document.getElementById("mail-city").value.trim();
+    mailState   = document.getElementById("mail-state").value.trim();
+    mailZip     = document.getElementById("mail-zip").value.trim();
+    mailFull    = [mailStreet, mailStreet2, mailCity + (mailState? ", "+mailState:""), mailZip]
+                    .filter(function(s){return s && s.replace(/^,\s*$/,"").length;}).join(", ");
+  }
+
   var payload={
     first_name:firstName,
     last_name:lastName,
@@ -679,8 +742,24 @@ function submitForm(){
     practice_name:document.getElementById("practiceName").value.trim(),
     email:document.getElementById("email").value.trim(),
     phone:document.getElementById("phone").value.trim(),
-    city:document.getElementById("city").value.trim(),
-    state:document.getElementById("state").value.trim(),
+    // ── Physical address ──
+    physical_street:physStreet,
+    physical_street_2:physStreet2,
+    physical_city:physCity,
+    physical_state:physState,
+    physical_zip:physZip,
+    physical_address_full:physFull,
+    // ── Mailing address ──
+    mailing_same_as_physical:mailingSame ? "Yes" : "No",
+    mailing_street:mailStreet,
+    mailing_street_2:mailStreet2,
+    mailing_city:mailCity,
+    mailing_state:mailState,
+    mailing_zip:mailZip,
+    mailing_address_full:mailFull,
+    // ── Backwards-compat keys ──
+    city:physCity,
+    state:physState,
     website:document.getElementById("website").value.trim(),
     key_contacts:JSON.stringify(getKeyContacts()),
     implant_experience:getRadio("implantExp"),
@@ -722,6 +801,19 @@ function submitForm(){
       phone: payload.phone,
       city: payload.city,
       state: payload.state,
+      physicalStreet: payload.physical_street,
+      physicalStreet2: payload.physical_street_2,
+      physicalCity: payload.physical_city,
+      physicalState: payload.physical_state,
+      physicalZip: payload.physical_zip,
+      physicalAddressFull: payload.physical_address_full,
+      mailingSameAsPhysical: payload.mailing_same_as_physical,
+      mailingStreet: payload.mailing_street,
+      mailingStreet2: payload.mailing_street_2,
+      mailingCity: payload.mailing_city,
+      mailingState: payload.mailing_state,
+      mailingZip: payload.mailing_zip,
+      mailingAddressFull: payload.mailing_address_full,
       website: payload.website,
       keyContacts: payload.key_contacts,
       implantExperience: payload.implant_experience,
