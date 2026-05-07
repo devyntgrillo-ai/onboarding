@@ -856,39 +856,49 @@ function submitForm(){
     }, 1800);
   }
 
-  // Zapier catch hooks parse form-encoded bodies into individual fields cleanly,
-  // but treat application/json as one raw payload. Build form data from payload.
-  function buildFormBody(obj){
-    var parts=[];
-    Object.keys(obj).forEach(function(k){
-      var v = obj[k];
-      if (v === null || v === undefined) v = "";
-      parts.push(encodeURIComponent(k) + "=" + encodeURIComponent(String(v)));
-    });
-    return parts.join("&");
-  }
-  var formBody = buildFormBody(payload);
+  // Zapier reliably parses native HTML form POSTs into individual fields.
+  // Submit through a hidden iframe so the page doesn't navigate, then redirect
+  // once the iframe load event fires (= Zapier received the request).
+  var zapUrl = "https://hooks.zapier.com/hooks/catch/26940795/u74wpkg/";
 
-  // POST to Zapier with keepalive so the request survives any navigation.
-  // No-cors so a missing CORS header doesn't trip a JS error — Zapier still
-  // receives and processes the body either way.
-  fetch("https://hooks.zapier.com/hooks/catch/26940795/u74wpkg/", {
-    method: "POST",
-    mode: "no-cors",
-    keepalive: true,
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: formBody
-  }).then(function(){
-    showSuccessAndRedirect();
-  }).catch(function(err){
-    console.warn("Zapier POST error:", err);
-    // Fallback: try sendBeacon, then show success regardless so the user isn't stuck
-    try {
-      var blob = new Blob([formBody], { type: "application/x-www-form-urlencoded" });
-      navigator.sendBeacon("https://hooks.zapier.com/hooks/catch/26940795/u74wpkg/", blob);
-    } catch(e) { /* noop */ }
-    showSuccessAndRedirect();
+  var iframe = document.createElement("iframe");
+  iframe.name = "zap_target_" + Date.now();
+  iframe.style.display = "none";
+  document.body.appendChild(iframe);
+
+  var form = document.createElement("form");
+  form.method = "POST";
+  form.action = zapUrl;
+  form.target = iframe.name;
+  form.enctype = "application/x-www-form-urlencoded";
+  form.acceptCharset = "UTF-8";
+  form.style.display = "none";
+
+  Object.keys(payload).forEach(function(k){
+    var v = payload[k];
+    if (v === null || v === undefined) v = "";
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = k;
+    input.value = String(v);
+    form.appendChild(input);
   });
+  document.body.appendChild(form);
+
+  var redirected = false;
+  function finish(){
+    if (redirected) return;
+    redirected = true;
+    showSuccessAndRedirect();
+  }
+
+  // Primary path: redirect once Zapier responds (iframe finishes loading).
+  iframe.addEventListener("load", finish);
+
+  // Safety net: if the load event never fires (rare network case), redirect anyway after 4s.
+  setTimeout(finish, 4000);
+
+  form.submit();
 }
 
 initRadios();
