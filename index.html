@@ -301,6 +301,28 @@ footer{position:relative;z-index:1;width:100%;max-width:820px;padding:1.5rem 2re
         <div class="slider-field"><div class="slider-top"><span class="slider-label">Treatment acceptance</span><span class="slider-val" id="sv-accRate">22%</span></div><input type="range" id="sl-accRate" min="5" max="65" step="1" value="22" oninput="sv(this,'sv-accRate',v=>v+'%')"><div class="slider-ends"><span>5%</span><span>65%</span></div></div>
       </div>
     </div>
+    <div class="section-group">
+      <div class="group-label">Financing options</div>
+      <div class="field full"><label>Which patient financing options does the practice currently offer? Select all that apply.</label>
+        <div class="pill-wrap" id="pg-financing">
+          <div class="pill" onclick="togglePill(this)">Sunbit</div>
+          <div class="pill" onclick="togglePill(this)">CareCredit</div>
+          <div class="pill" onclick="togglePill(this)">Cherry</div>
+          <div class="pill" onclick="togglePill(this)">Alphaeon</div>
+          <div class="pill" onclick="togglePill(this)">Proceed Finance</div>
+          <div class="pill" onclick="togglePill(this)">LendingClub</div>
+          <div class="pill" onclick="togglePill(this)">GreenSky</div>
+          <div class="pill" onclick="togglePill(this)">Ally</div>
+          <div class="pill" onclick="togglePill(this)">In-house financing</div>
+          <div class="pill" onclick="togglePill(this)">None</div>
+        </div>
+      </div>
+      <div class="field full" style="margin-top:1rem">
+        <label>Other providers <span style="color:var(--muted);font-weight:400">(optional — add up to 3)</span></label>
+        <div id="financingOtherList"></div>
+        <button class="add-btn" id="addFinancingOtherBtn" onclick="addFinancingOther()" type="button"><span class="add-icon">+</span>Add another financing option</button>
+      </div>
+    </div>
     <div class="error-toast" id="err-2"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Please complete the required fields above.</div>
     <div class="btn-row">
       <button class="btn" onclick="prev(2)">&larr; Back</button>
@@ -630,6 +652,59 @@ function addContact() {
   wrap.appendChild(card);
 }
 
+var financingOtherCount = 0;
+var FINANCING_OTHER_MAX = 3;
+function addFinancingOther(){
+  if (financingOtherCount >= FINANCING_OTHER_MAX) return;
+  financingOtherCount++;
+  var wrap = document.getElementById("financingOtherList");
+  var row = document.createElement("div");
+  row.className = "financing-other-row";
+  row.style.cssText = "display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem";
+
+  var input = document.createElement("input");
+  input.type = "text";
+  input.className = "financing-other";
+  input.placeholder = "e.g. Patient Fi, Wisetack, in-office plan…";
+  input.style.cssText = "flex:1;background:var(--field-bg);border:1px solid var(--border);color:var(--white);font-family:var(--font);font-size:.9rem;padding:.75rem 1rem;outline:none;border-radius:6px;transition:border-color .2s,background .2s,box-shadow .2s";
+  input.addEventListener("focus", function(){ this.style.borderColor="var(--gold-bright)"; this.style.background="var(--field-bg-focus)"; this.style.boxShadow="0 0 0 3px rgba(93,176,255,.12)"; });
+  input.addEventListener("blur",  function(){ this.style.borderColor="var(--border)"; this.style.background="var(--field-bg)"; this.style.boxShadow="none"; });
+
+  var remove = document.createElement("button");
+  remove.type = "button";
+  remove.textContent = "✕";
+  remove.title = "Remove";
+  remove.style.cssText = "background:none;border:1px solid var(--border);color:var(--muted);width:42px;height:42px;border-radius:6px;cursor:pointer;font-size:14px;flex-shrink:0;transition:all .15s";
+  remove.addEventListener("mouseover", function(){ this.style.color="var(--red)"; this.style.borderColor="var(--red)"; });
+  remove.addEventListener("mouseout",  function(){ this.style.color="var(--muted)"; this.style.borderColor="var(--border)"; });
+  remove.onclick = function(){
+    row.remove();
+    financingOtherCount = document.querySelectorAll("#financingOtherList .financing-other-row").length;
+    var btn = document.getElementById("addFinancingOtherBtn");
+    if (btn) btn.style.display = "";
+  };
+
+  row.appendChild(input);
+  row.appendChild(remove);
+  wrap.appendChild(row);
+  input.focus();
+
+  if (financingOtherCount >= FINANCING_OTHER_MAX) {
+    var btn = document.getElementById("addFinancingOtherBtn");
+    if (btn) btn.style.display = "none";
+  }
+}
+
+function getFinancingOthers(){
+  var inputs = document.querySelectorAll("#financingOtherList .financing-other");
+  var values = [];
+  inputs.forEach(function(i){
+    var v = i.value.trim();
+    if (v) values.push(v);
+  });
+  return values;
+}
+
 function removeCard(btn,wrapperId,type){
   var card=btn.closest(".contact-card");
   card.remove();
@@ -771,6 +846,17 @@ function submitForm(){
     consult_show_rate_pct:document.getElementById("sl-showRate").value,
     booking_rate_pct:document.getElementById("sl-bookRate").value,
     acceptance_rate_pct:document.getElementById("sl-accRate").value,
+    financing_options:getPills("pg-financing"),
+    financing_other_1:(getFinancingOthers()[0]||""),
+    financing_other_2:(getFinancingOthers()[1]||""),
+    financing_other_3:(getFinancingOthers()[2]||""),
+    financing_other_all:getFinancingOthers().join(", "),
+    financing_all:[getPills("pg-financing"), getFinancingOthers().join(", ")].filter(function(s){return s;}).join(", "),
+    financing_count:(function(){
+      var preset = getPills("pg-financing").split(",").map(function(s){return s.trim();}).filter(function(s){return s && s !== "None";}).length;
+      var others = getFinancingOthers().length;
+      return String(preset + others);
+    })(),
     lead_sources:getPills("pg-sources"),
     monthly_ad_spend:document.getElementById("sl-adSpend").value,
     has_tc:getRadio("hasTC"),
@@ -825,6 +911,13 @@ function submitForm(){
       showRate: payload.consult_show_rate_pct,
       bookingRate: payload.booking_rate_pct,
       acceptanceRate: payload.acceptance_rate_pct,
+      financingOptions: payload.financing_options,
+      financingOther1: payload.financing_other_1,
+      financingOther2: payload.financing_other_2,
+      financingOther3: payload.financing_other_3,
+      financingOtherAll: payload.financing_other_all,
+      financingAll: payload.financing_all,
+      financingCount: payload.financing_count,
       leadSources: payload.lead_sources,
       monthlyAdSpend: payload.monthly_ad_spend,
       hasTC: payload.has_tc,
