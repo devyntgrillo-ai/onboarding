@@ -230,9 +230,9 @@ footer{position:relative;z-index:1;width:100%;max-width:820px;padding:1.5rem 2re
       <div class="group-label">Treatment coordinator</div>
       <div class="field full"><label>Do you have a dedicated TC? <span class="req">*</span></label>
         <div class="radio-stack" id="rg-hasTC">
-          <label class="radio-opt" onclick="toggleTC(this,'yes-ftc')"><input type="radio" name="hasTC" value="Yes — dedicated full-time TC"><span class="radio-dot"></span>Yes — dedicated full-time TC</label>
-          <label class="radio-opt" onclick="toggleTC(this,'yes-pt')"><input type="radio" name="hasTC" value="Yes — TC who also handles other roles"><span class="radio-dot"></span>Yes — TC who also handles other roles</label>
-          <label class="radio-opt" onclick="toggleTC(this,'no')"><input type="radio" name="hasTC" value="No — front desk handles it"><span class="radio-dot"></span>No — front desk handles it</label>
+          <label class="radio-opt" onclick="toggleTC(this,'yes-ftc')"><input type="radio" name="hasTC" value="Yes, dedicated full-time TC"><span class="radio-dot"></span>Yes, dedicated full-time TC</label>
+          <label class="radio-opt" onclick="toggleTC(this,'yes-pt')"><input type="radio" name="hasTC" value="Yes, TC who also handles other roles"><span class="radio-dot"></span>Yes, TC who also handles other roles</label>
+          <label class="radio-opt" onclick="toggleTC(this,'no')"><input type="radio" name="hasTC" value="No, front desk handles it"><span class="radio-dot"></span>No, front desk handles it</label>
           <label class="radio-opt" onclick="toggleTC(this,'no')"><input type="radio" name="hasTC" value="No TC at all"><span class="radio-dot"></span>No TC at all</label>
         </div>
       </div>
@@ -371,6 +371,13 @@ footer{position:relative;z-index:1;width:100%;max-width:820px;padding:1.5rem 2re
       <div class="group-label">Systems</div>
       <div class="form-grid">
         <div class="field full"><label>Practice management software (PMS)</label><input id="crm" type="text" placeholder="Dentrix, Eaglesoft, Curve, none…"></div>
+      </div>
+      <div class="field full" style="margin-top:1rem"><label>Can you export a list of <b style="color:var(--white);font-weight:800">unscheduled implant tx plans</b> — or would we need to have someone go compile that list manually?</label>
+        <div class="radio-stack" id="rg-unschedExport">
+          <label class="radio-opt"><input type="radio" name="unschedExport" value="Yes, I can export it from our PMS"><span class="radio-dot"></span>Yes, I can export it from our PMS</label>
+          <label class="radio-opt"><input type="radio" name="unschedExport" value="No, someone would need to compile it manually"><span class="radio-dot"></span>No, someone would need to compile it manually</label>
+          <label class="radio-opt"><input type="radio" name="unschedExport" value="Not sure, need to check"><span class="radio-dot"></span>Not sure, need to check</label>
+        </div>
       </div>
     </div>
     <div class="error-toast" id="err-3"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Please complete the required fields above.</div>
@@ -867,6 +874,7 @@ function submitForm(){
     has_agency:getRadio("hasAgency"),
     agencies:JSON.stringify(getAgencies()),
     crm_software:document.getElementById("crm").value.trim(),
+    unscheduled_tx_export:getRadio("unschedExport"),
     goals_90_day:getPills("pg-goals"),
     biggest_leak:getRadio("biggestLeak"),
     target_annual_revenue:document.getElementById("sl-targetRev").value,
@@ -928,6 +936,7 @@ function submitForm(){
       hasAgency: payload.has_agency,
       agencies: payload.agencies,
       crm: payload.crm_software,
+      unscheduledTxExport: payload.unscheduled_tx_export,
       goals90Day: payload.goals_90_day,
       biggestLeak: payload.biggest_leak,
       targetAnnualRevenue: payload.target_annual_revenue,
